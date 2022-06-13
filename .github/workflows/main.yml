@@ -17,12 +17,13 @@ jobs:
         uses: britannio/action-install-flutter@v1.1
   
       - name: Build Flutter App
-        run: flutter build apk
+        run: flutter build apk --split-per-abi
       
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
+          tag_name: Beta Master Release
           files: |
             build/app/outputs/flutter-apk/app.apk
             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
