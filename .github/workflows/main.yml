@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ kphanipavan-patch-1 ]
+    branches: [ master ]
   pull_request:
-    branches: [ kphanipavan-patch-1 ]
+    branches: [ master ]
   workflow_dispatch:
   
 jobs:
