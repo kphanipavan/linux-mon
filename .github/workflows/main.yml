@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install Flutter
-        uses: britannio/action-install-flutter@latest
+        uses: britannio/action-install-flutter@v1.1
   
       - name: Build Flutter App per ABI
         run:  |
