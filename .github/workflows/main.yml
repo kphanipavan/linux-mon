@@ -2,30 +2,43 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master kphanipavan-patch-1 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master kphanipavan-patch-1 ]
   workflow_dispatch:
   
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Install Flutter
-        uses: britannio/action-install-flutter@v1.1
+        uses: britannio/action-install-flutter@latest
   
-      - name: Build Flutter App
-        run: flutter build apk --split-per-abi
+      - name: Build Flutter App per ABI
+        run:  |
+          flutter build apk --split-per-abi
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk linux-mon-arm64-v8a-master.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk linux-mon-armeabiv7a-master.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk linux-mon-x86-64-master.apk
+          flutter clean
+          
+      - name: Build Flutter App as Single Package
+        run: |
+          flutter build apk
+          cp build/app/outputs/flutter-apk/app-release.apk linux-mon-universal-master.apk
+          flutter clean
+          ls
       
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
+      - name: Automatic Releases
+        uses: marvinpinto/action-automatic-releases@latest
+        with: 
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
           prerelease: true
-          tag_name: Beta Master Release
+          title: "Master Builds"
           files: |
-            build/app/outputs/flutter-apk/app.apk
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            linux-mon-arm64-v8a-master.apk
+            linux-mon-armeabiv7a-master.apk
+            linux-mon-x86-64-master.apk
+            linux-mon-universal-master.apk
