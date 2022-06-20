@@ -1,41 +1,44 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Install Flutter
         uses: britannio/action-install-flutter@v1.1
-      
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+  
+      - name: Build Flutter App per ABI
+        run:  |
+          flutter build apk --split-per-abi
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk linux-mon-arm64-v8a-master.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk linux-mon-armeabiv7a-master.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk linux-mon-x86-64-master.apk
+          flutter clean
           
-      - name: Build Flutter App
-        run: flutter build apk
+      - name: Build Flutter App as Single Package
+        run: |
+          flutter build apk
+          cp build/app/outputs/flutter-apk/app-release.apk linux-mon-universal-master.apk
+          flutter clean
+          ls
+      
+      - name: Automatic Releases
+        uses: marvinpinto/action-automatic-releases@latest
+        with: 
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Master Builds"
+          files: |
+            linux-mon-arm64-v8a-master.apk
+            linux-mon-armeabiv7a-master.apk
+            linux-mon-x86-64-master.apk
+            linux-mon-universal-master.apk
